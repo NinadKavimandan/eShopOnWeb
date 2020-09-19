@@ -1,0 +1,46 @@
+on:
+  push:
+    branches:
+    - master
+name: New standard Build and deploy .NET Core app to Linux WebApp
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+    
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS_GITHUB_SECRET }}
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 
+    
+    - name: Install dependencies
+      run: dotnet restore src/BlazorAdmin
+    
+    - name: Build
+      run: dotnet build src/BlazorAdmin --configuration Release --no-restore
+    
+    - name: Publish artifact
+      run: dotnet publish src/BlazorAdmin --configuration Release --no-build --output src/BlazorAdmin/publish
+    
+    - uses: azure/appservice-settings@v1
+      with:
+        app-name: anchauhLinuxWebApp
+        general-settings-json: '{"linuxFxVersion": "DOTNETCORE|3.1"}' #'General configuration settings as Key Value pairs'
+    
+    - name: Deploy to Azure WebApp
+      uses: azure/webapps-deploy@v1
+      with:
+        app-name: anchauhLinuxWebApp
+        package: src/BlazorAdmin/publish
+
+    - name: logout
+      run: |
+        az logout
