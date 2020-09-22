@@ -2,7 +2,7 @@ on:
   push:
     branches:
     - master
-name: quite new Build and deploy .NET Core app to Linux WebApp
+name: too quite new Build and deploy .NET Core app to Linux WebApp
 
 jobs:
   build:
